@@ -1,6 +1,8 @@
 import os
 import telebot
 import threading
+import re  # Ajouter cette ligne pour importer le module re
+import pandas as pd
 from flask import Flask
 
 # Remplacer par le token de votre bot Telegram depuis les variables d'environnement
