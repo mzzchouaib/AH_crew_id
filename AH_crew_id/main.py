@@ -2,15 +2,28 @@ import os
 import telebot
 import pandas as pd
 import re
+from flask import Flask
 
-# Remplacez 'YOUR_BOT_TOKEN' par le token de votre bot Telegram
+# Crée une application Flask pour que Render puisse détecter le port ouvert
+app = Flask(__name__)
+
+# Remplacez par le token de votre bot Telegram
 TOKEN = '7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U'
 bot = telebot.TeleBot(TOKEN)
 
 # Charger le fichier Excel
-# Remplacez 'ecrew_list.xlsx' par le nom de votre fichier Excel
 excel_file = 'ecrew_list.xlsx'
 
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    json_str = request.get_data().decode('UTF-8')
+    update = telebot.types.Update.de_json(json_str)
+    bot.process_new_updates([update])
+    return "OK", 200
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -19,9 +32,7 @@ def send_welcome(message):
         "Bienvenue ! Transférez-moi un message contenant les informations de CP et/ou FO pour effectuer la recherche."
     )
 
-
-@bot.message_handler(
-    func=lambda message: "CP:" in message.text or "FO:" in message.text)
+@bot.message_handler(func=lambda message: "CP:" in message.text or "FO:" in message.text)
 def find_data_from_message(message):
     try:
         # Message de débogage pour confirmer que la fonction est appelée
@@ -81,8 +92,11 @@ def find_data_from_message(message):
     bot.reply_to(message, response)
     print("Réponse envoyée")  # Message de débogage
 
-
 # Démarrer le bot avec long polling
 if __name__ == "__main__":
     print("Le bot est en cours d'exécution...")
     bot.polling(none_stop=True)
+
+    # Faire tourner Flask pour répondre aux requêtes de Render
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
