@@ -1,16 +1,26 @@
+import os
 import telebot
-import pandas as pd
-import re
+import threading
+from flask import Flask
 
-# Remplacez 'YOUR_BOT_TOKEN' par le token de votre bot Telegram
+# Remplacer par le token de votre bot Telegram depuis les variables d'environnement
 TOKEN = '7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U'
 bot = telebot.TeleBot(TOKEN)
 
 # Charger le fichier Excel
-# Remplacez 'data.xlsx' par le nom de votre fichier Excel
+# Remplacer 'data.xlsx' par le nom de votre fichier Excel
 excel_file = 'ecrew_list.xlsx'
 
+# Création de l'application Flask
+app = Flask(__name__)
 
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+
+# Fonction de gestion de commande /start et /help
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(
@@ -19,6 +29,7 @@ def send_welcome(message):
     )
 
 
+# Fonction pour traiter les messages contenant CP: ou FO:
 @bot.message_handler(
     func=lambda message: "CP:" in message.text or "FO:" in message.text)
 def find_data_from_message(message):
@@ -81,6 +92,19 @@ def find_data_from_message(message):
     print("Réponse envoyée")  # Message de débogage
 
 
-# Démarrer le bot
-print("Le bot est en cours d'exécution...")
-bot.polling()
+# Fonction pour démarrer le serveur Flask
+def run_flask():
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
+
+
+# Fonction pour démarrer le bot Telegram
+def run_bot():
+    bot.polling()
+
+
+if __name__ == '__main__':
+    # Démarrer Flask dans un thread séparé
+    threading.Thread(target=run_flask).start()
+
+    # Démarrer le bot
+    run_bot()
