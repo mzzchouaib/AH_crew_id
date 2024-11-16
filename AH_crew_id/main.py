@@ -17,9 +17,15 @@ app = Flask(__name__)
 # Définir le webhook pour Telegram
 @app.route('/' + TOKEN, methods=['POST'])
 def webhook():
+    print("Webhook received a POST request")
     json_str = request.get_data().decode('UTF-8')
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
+    print("Received JSON: ", json_str)  # Afficher la réponse du webhook
+    try:
+        update = telebot.types.Update.de_json(json_str)
+        print("Update parsed successfully")
+        bot.process_new_updates([update])
+    except Exception as e:
+        print("Error parsing update:", e)
     return "OK", 200
 
 # Commandes Telegram
@@ -68,13 +74,28 @@ def find_data_from_message(message):
     except Exception as e:
         bot.reply_to(message, f"Erreur : {e}")
 
+
+def handle_start_help(message):
+    print(f"Handling message: {message.text}")  # Afficher le message reçu
+
+# Dans le gestionnaire de commandes Telegram
+@bot.message_handler(commands=['start', 'help'])
+def start_help(message):
+    handle_start_help(message)
+    bot.reply_to(message, "Hello! I'm your bot.")
+
+
 # Configurer le webhook
 def set_webhook():
-    url = "https://1fa807e4-0eed-48e3-8798-398a761824ef-00-279bv41s8ic2x.kirk.replit.dev/7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U"
+    url = "https://1fa807e4-0eed-48e3-8798-398a761824ef-00-279bv41s8ic2x.kirk.replit.dev/7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U/"
     bot.remove_webhook()
     bot.set_webhook(url=url)
     print(f"Webhook set to {url}")
+    # Vérifier l'état du webhook
+    status = bot.get_webhook_info()
+    print(status)
+
 
 if __name__ == "__main__":
-    set_webhook()
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))  # Assurez-vous que Replit utilise le port 5000
+    app.run(host="0.0.0.0", port=5000)
