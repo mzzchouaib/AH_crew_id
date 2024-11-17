@@ -87,7 +87,7 @@ def start_help(message):
 
 # Configurer le webhook
 def set_webhook():
-    url = "https://1fa807e4-0eed-48e3-8798-398a761824ef-00-279bv41s8ic2x.kirk.replit.dev/7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U/"
+    url = "https://ah-crew-id.onrender.com/7937958121:AAEe9rgnyaIUOcEm0dAMOcRsXK_dvUWi81U/"
     bot.remove_webhook()
     bot.set_webhook(url=url)
     print(f"Webhook set to {url}")
